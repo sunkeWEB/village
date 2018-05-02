@@ -1,30 +1,28 @@
-import React, {Component} from "react";
-import {Input,Button} from 'antd';
-import {connect} from 'react-redux';
-import {Logins} from './../reducer/user.redux';
-import axios from 'axios';
-@connect(state=>state,{
-    Logins
-})
-class Login extends Component {
-    componentWillMount () {
-        console.log(this.props)
+import React, { Component } from 'react';
+import { Input,Button } from 'antd';
+import test from './../test.css';
+
+export default class App extends Component {
+    constructor(props){
+        super(props)
     }
-    _submitLogin () {
-        this.props.Logins();
-        console.log("_submitLogin");
-       // Logins({name:'root',pwd:'sunke'})();
-        // axios.post('users/login', {name:'root',pwd:'sunke1'}).then(res => {
-        //     console.log(res);
-        // });
-    }
+
     render() {
-        return (
-            <div>
-                <Button onClick={this._submitLogin}>登录</Button>
+        return (<div className="bg_login">
+                <div className="bg_tit">
+                    <span style={{fontFamily:'华文琥珀',letterSpacing:8,fontSize:45,textShadow:'2px 1px #fff',color:'#d71518'}}>金沙县村干部管理系统</span>
+                </div>
+                <div className="bg_mesa">
+                </div>
+                <div className="bg_toum">
+                    <Input style={{width:290,height:45,marginTop:70,marginLeft:90,opacity:'initial'}} placeholder='请输入账号'/>
+                    <Input style={{width:290,height:45,marginTop:25,marginLeft:90}} placeholder='请输入密码'/>
+                    <Button style={{width:290,height:45,marginTop:60,background:'#dd2f2e',marginLeft:90,border:'none'}} type="primary">登陆</Button>
+                </div>
+                <div className="bg_res">
+                    <span style={{fontFamily:'宋体',fontSize:20,color:'black'}}>@2018贵州可靠智慧能源技术有限公司 All Rights Reserverd</span>
+                </div>
             </div>
-        )
+        );
     }
 }
-
-export default Login;

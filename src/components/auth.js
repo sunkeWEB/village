@@ -9,11 +9,11 @@ class AuthRoute extends React.Component {
         console.log(this.props);
         let x = '';
         console.log(x === '123');
-        if (x === '') {
-            return false;
-        } else {
-            this.props.history.push('/logins');
-        }
+        // if (x === '') {
+        //     return false;
+        // } else {
+        //     this.props.history.push('/logins');
+        // }
     }
 
     render() {
