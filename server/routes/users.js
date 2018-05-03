@@ -6,6 +6,7 @@ const util = require('util');
 const verify = util.promisify(jwt.verify); // 解密
 const {webSetting} = require('./../webConfig');
 const secret = webSetting.secret;
+const utility = require('utility');
 const {query} = require('./../asyncdb');
 router.prefix('/users')
 
@@ -46,9 +47,10 @@ router.post('/login', async (ctx) => {
     }
     let ips = ctx.request.ip.slice(7);
     let time = new Date().getTime();
-    // await query(`update users set lastlogintime='${time}',lastloginip='${ips}' where id='${k[0].id}'`);
-    // console.log(`update users set lastlogintime='${time}',lastloginip='${ips}' where id='${k[0].id}'`);
     const token = jwt.sign(userToken, secret, {expiresIn: '12h'});
+    ctx.cookies.set('userid', k[0].id, {
+        maxAge: 800 * 60 * 60 * 1000,   // cookie有效时长 加密用户的id
+    });
     ctx.body = {
         msg: '登录成功',
         code: 0,
@@ -79,4 +81,34 @@ router.post('/updateinfo', async (ctx) => {
     };
 });
 
-module.exports = router
+router.get('/info', async ctx => {
+    const userid = ctx.cookies.get('userid');
+    let k = await query(`SELECT * FROM users WHERE id='${userid}'`);
+    if (k.length > 0) {
+        let userToken = {
+            name: `${k[0].id},${k[0].username}`
+        }
+        let ips = ctx.request.ip.slice(7);
+        let time = new Date().getTime();
+        const token = jwt.sign(userToken, secret, {expiresIn: '12h'});
+        ctx.body = {
+            msg: '登录信息存在',
+            code: 0,
+            token,
+            data: k[0]
+        };
+    } else {
+        ctx.body = {
+            code: 1,
+            msg: '没找到用户相关数据'
+        };
+    }
+});
+
+// function md5(value) {
+//     const k = webSetting.idsecrect;
+//     value = value + k;
+//     return utility.md5(utility.md5(value));
+// }
+
+module.exports = router;

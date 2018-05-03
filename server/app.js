@@ -17,7 +17,7 @@ onerror(app)
 // 使用token验证
 // app.use(tokenError());
 app.use(jwtKoa({secret}).unless({
-    path: [/\/users\/login/] //数组中的路径不需要通过jwt验证
+    path: [/\/users\/login/,/\/users\/info/] //数组中的路径不需要通过jwt验证
 }))
 
 // middlewares

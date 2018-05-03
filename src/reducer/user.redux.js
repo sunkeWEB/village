@@ -2,17 +2,21 @@ import axios from 'axios';
 
 const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
 const ERR_MSG = 'ERR';
-
 const init = {
     name: '',
     msg: '',
-    age: 12
+    token: '',
+    errMsg: '',
+    redicertTo:''
 };
 
 export function user(state = init, action) {
     switch (action.type) {
         case LOGIN_SUCCESS:
-            return {...state, isAuth: true, msg: '', redicertTo: ''};
+            let x = action.payload;
+            return {...state, isAuth: true, errMsg: '', redicertTo: '/', token: x.token, name: x.data.realname};
+        case ERR_MSG:
+            return {...state, errMsg: action.msg}
         default:
             return state;
     }
@@ -27,16 +31,18 @@ function errMsg(msg) {
 }
 
 export function Logins({name, pwd}) {
-    console.log("Logins", {name, pwd});
     return dispatch => {
-        console.log("dispatch");
         axios.post('/users/login', {name, pwd}).then(res => {
             console.log(res);
             if (res.status === 200 && res.data.code === 0) {
-                dispatch(loginSuccess(res.data.data));
+                dispatch(loginSuccess(res.data));
             } else {
-                dispatch(errMsg(res.data.msg));
+                dispatch(errMsg(res.data.msg)); // 登录错误
             }
         });
     };
+}
+
+export function loadDate(data) {
+    return {type: LOGIN_SUCCESS, payload: data}
 }

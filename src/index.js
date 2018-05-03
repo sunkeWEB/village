@@ -15,7 +15,7 @@ const store = createStore(reducer, compose(
     window.devToolsExtension ? window.devToolsExtension() : f => f
 ));
 
-ReactDOM.render(
+ReactDOM.render((
     <Provider store={store}>
         <BrowserRouter>
             <div style={{height: "100%"}}>
@@ -26,5 +26,5 @@ ReactDOM.render(
                 </Switch>
             </div>
         </BrowserRouter>
-    </Provider>
-    , document.getElementById('root'));
+    </Provider>),
+    document.getElementById('root'));
