@@ -23,6 +23,9 @@ class MyTownSelect extends Component {
 
     async handleChange(key, value) {
         let village = await readvillage({parentid: value}); // 获取村
+        if (this.props.isprops) {  // 如果props为true 的时候 可以不用选择村这些就可以查询
+            this.props.selectTown(value)
+        }
         this.setState({
             villages: village.data,
             townids: value

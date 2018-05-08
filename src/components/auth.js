@@ -6,7 +6,11 @@ import {loadDate} from './../reducer/user.redux';
 @withRouter
 @connect(state=>state, {loadDate})
 class AuthRoute extends React.Component {
-    componentDidMount() {
+    constructor (props) {
+        super(props);
+        this._init();
+    }
+  async  _init() {
         const publicList = ['/login'];
         const pathname = this.props.location.pathname;
         if (publicList.indexOf(pathname) > -1) {

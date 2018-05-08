@@ -3,10 +3,15 @@ import {Button, Input, Table, Popconfirm, Icon, InputNumber, Select, DatePicker}
 import MyTownSelect from './../components/MyTownSelect'; // 乡镇选择
 import Posts from './../components/Posts'; // 职务选择
 import {readposts, addCadrs} from './../api/api';
+import UploadImg from './../components/UploadImg';
+import {withRouter} from 'react-router-dom';
+import {connect} from 'react-redux';
 
 const {TextArea} = Input;
 const Option = Select.Option;
 
+@withRouter
+@connect(state => state, {})
 class Cadre extends Component {
     constructor(props) {
         super(props);
@@ -31,13 +36,80 @@ class Cadre extends Component {
     }
 
     async submitSave() {
-        let k = this.getarr('jcqks');
-        let s = this.getarr('pxqk');
-        let c = this.getarr('lvqk');
-        console.log({...this.state});
+        let k = this.getarr('jcqks');  // 奖惩情况
+        let s = this.getarr('pxqk');  // 培训情况
+        let c = this.getarr('lvqk');  // 履历情况
+        console.log(c);
+        let ss = []; // 存放培训情况的信息
+        for (let b=0;b<s.length;b++) {
+            if ((s[b].time === '' || s[b].value === '') && b !== 0) { // 判断除了第一项的 其他值
+                alert(`培训情况栏目第 ${b + 1} 栏中信息不能为空`);
+                return;
+            } else {
+                if (b === 0) {
+                    if (s[b].time !== '' || s[b].value !== '') {  // 判断第一项里面其中一项是不是有值
+                        if (s[b].time !== '' && s[b].value !== '') {
+                            ss.push(s[b]);
+                        }else{
+                            alert(`培训情况栏目第 1 栏中信息不准确,请检查`);
+                            return;
+                        }
+                    }
+                }else{
+                    ss.push(s[b]);
+                }
+            }
+        }
+
+        let kk = []; //  存放奖惩情况
+        for (let b=0;b<k.length;b++) {
+            if ((k[b].time === '' || k[b].jcvalue === '') && b !== 0) { // 判断除了第一项的 其他值
+                alert(`奖惩情况栏目第 ${b + 1} 栏中信息不能为空`);
+                return ;
+            } else {
+                if (b === 0) {
+                    console.log(s[b]);
+                    if (k[b]['jcvalue'] !== '' ||k[b].time !== '') {  // 判断第一项里面其中一项是不是有值
+                        if (k[b].time !== '' && k[b]['jcvalue'] !== '') {
+                            kk.push(k[b]);
+                        }else{
+                            alert(`奖惩情况栏目第 1 栏中信息不准确,请检查`);
+                            return;
+                        }
+                    }
+                }else{
+                    kk.push(k[b]);
+                }
+            }
+        }
+
+        let cc = []; // 存放履历情况
+        // for (let b=0;b<c.length;b++) {
+        //     if ((k[b].time === '' || k[b].jcvalue === '') && b !== 0) { // 判断除了第一项的 其他值
+        //         alert(`奖惩情况栏目第 ${b + 1} 栏中信息不能为空`);
+        //         return ;
+        //     } else {
+        //         if (b === 0) {
+        //             console.log(s[b]);
+        //             if (k[b]['jcvalue'] !== '' ||k[b].time !== '') {  // 判断第一项里面其中一项是不是有值
+        //                 if (k[b].time !== '' && k[b]['jcvalue'] !== '') {
+        //                     kk.push(k[b]);
+        //                 }else{
+        //                     alert(`奖惩情况栏目第 1 栏中信息不准确,请检查`);
+        //                     return;
+        //                 }
+        //             }
+        //         }else{
+        //             kk.push(k[b]);
+        //         }
+        //     }
+        // }
+
+        return;
         let m = await addCadrs({...this.state});
-        console.log(m);
     }
+
+
 
     getarr(dom) {
         let arr = [];
@@ -55,8 +127,6 @@ class Cadre extends Component {
                     keyName = cs[cs.length - 1];
                 }
                 dic[keyName] = val;
-                // console.log(dic);
-
             }
             arr.push(dic);
             for (let b of i.getElementsByClassName(`ant-select-selection-selected-value`)) {
@@ -82,72 +152,97 @@ class Cadre extends Component {
                         fontSize: 10
                     }} className={"bars"}><span style={{margin: '0 15px'}}>基本信息</span><span
                         style={{color: 'red'}}>(必填)</span></div>
-                    <div style={{display: 'flex', padding: 10}}>
-                        <div style={{display: 'flex'}}>
-                            <div
-                                style={{width: 100, display: 'flex', alignItems: "center", justifyContent: "center"}}>姓名
-                            </div>
-                            <Input style={{width: 120}} onChange={(v) => this.handleInput('realname', v.target.value)}
-                                   placeholder={"姓名"}/>
-                        </div>
-                        <div style={{display: 'flex'}}>
-                            <div
-                                style={{width: 100, display: 'flex', alignItems: "center", justifyContent: "center"}}>性别
-                            </div>
-                            <Select style={{width: 120}} placeholder={"选择性别"}
-                                    onChange={(v) => this.handleInput('sex', v)}>
-                                <Option value={1}>男</Option>
-                                <Option value={0}>女</Option>
-                            </Select>
-                        </div>
-                        <div style={{display: 'flex'}}>
-                            <div style={{
-                                width: 150,
-                                display: 'flex',
-                                alignItems: "center",
-                                justifyContent: "center"
-                            }}>联系电话
-                            </div>
-                            <Input onChange={(v) => this.handleInput('phone', v.target.value)} placeholder={"联系电话"}/>
-                        </div>
-                    </div>
-                    <div style={{display: 'flex', paddingLeft: 10, paddingRight: 10, paddingBottom: 10}}>
-                        <div style={{display: 'flex'}}>
-
-                            <div style={{display: 'flex'}}>
-                                <div style={{
-                                    width: 100,
-                                    display: 'flex',
-                                    alignItems: "center",
-                                    justifyContent: "center"
-                                }}>学历
+                    <div style={{display: 'flex', padding: "10px 0"}}>
+                        <div>
+                            <div style={{display: 'flex', padding: 10}}>
+                                <div style={{display: 'flex'}}>
+                                    <div
+                                        style={{
+                                            width: 100,
+                                            display: 'flex',
+                                            alignItems: "center",
+                                            justifyContent: "center"
+                                        }}>姓名
+                                    </div>
+                                    <Input style={{width: 120}}
+                                           onChange={(v) => this.handleInput('realname', v.target.value)}
+                                           placeholder={"姓名"}/>
                                 </div>
-                                <Select style={{width: 120}} placeholder={"学历状况"}
-                                        onChange={(v) => this.handleInput('edu', v)}>
-                                    <Option value={"本科"}>本科</Option>
-                                    <Option value={"博士"}>博士</Option>
-                                </Select>
+                                <div style={{display: 'flex'}}>
+                                    <div
+                                        style={{
+                                            width: 100,
+                                            display: 'flex',
+                                            alignItems: "center",
+                                            justifyContent: "center"
+                                        }}>性别
+                                    </div>
+                                    <Select style={{width: 120}} placeholder={"选择性别"}
+                                            onChange={(v) => this.handleInput('sex', v)}>
+                                        <Option value={1}>男</Option>
+                                        <Option value={0}>女</Option>
+                                    </Select>
+                                </div>
+                                <div style={{display: 'flex'}}>
+                                    <div style={{
+                                        width: 150,
+                                        display: 'flex',
+                                        alignItems: "center",
+                                        justifyContent: "center"
+                                    }}>联系电话
+                                    </div>
+                                    <Input onChange={(v) => this.handleInput('phone', v.target.value)}
+                                           placeholder={"联系电话"}/>
+                                </div>
+                            </div>
+                            <div style={{display: 'flex', paddingLeft: 10, paddingRight: 10, paddingBottom: 10}}>
+                                <div style={{display: 'flex'}}>
+
+                                    <div style={{display: 'flex'}}>
+                                        <div style={{
+                                            width: 100,
+                                            display: 'flex',
+                                            alignItems: "center",
+                                            justifyContent: "center"
+                                        }}>学历
+                                        </div>
+                                        <Select style={{width: 120}} placeholder={"学历状况"}
+                                                onChange={(v) => this.handleInput('edu', v)}>
+                                            <Option value={"本科"}>本科</Option>
+                                            <Option value={"博士"}>博士</Option>
+                                        </Select>
+                                    </div>
+                                </div>
+                                <div style={{display: 'flex'}}>
+                                    <div
+                                        style={{
+                                            width: 100,
+                                            display: 'flex',
+                                            alignItems: "center",
+                                            justifyContent: "center"
+                                        }}>民族
+                                    </div>
+                                    <Select style={{width: 120}} placeholder={"选择民族"}
+                                            onChange={(v) => this.handleInput('mingzu', v)}>
+                                        <Option value="汉族">汉族</Option>
+                                        <Option value="蒙古族">蒙古族</Option>
+                                    </Select>
+                                </div>
+                                <div style={{display: 'flex'}}>
+                                    <div style={{
+                                        width: 150,
+                                        display: 'flex',
+                                        alignItems: "center",
+                                        justifyContent: "center"
+                                    }}>身份证号
+                                    </div>
+                                    <Input onChange={(v) => this.handleInput('card', v.target.value)}
+                                           placeholder={"身份证号"}/>
+                                </div>
                             </div>
                         </div>
-                        <div style={{display: 'flex'}}>
-                            <div
-                                style={{width: 100, display: 'flex', alignItems: "center", justifyContent: "center"}}>民族
-                            </div>
-                            <Select style={{width: 120}} placeholder={"选择民族"}
-                                    onChange={(v) => this.handleInput('mingzu', v)}>
-                                <Option value="汉族">汉族</Option>
-                                <Option value="蒙古族">蒙古族</Option>
-                            </Select>
-                        </div>
-                        <div style={{display: 'flex'}}>
-                            <div style={{
-                                width: 150,
-                                display: 'flex',
-                                alignItems: "center",
-                                justifyContent: "center"
-                            }}>身份证号
-                            </div>
-                            <Input onChange={(v) => this.handleInput('card', v.target.value)} placeholder={"身份证号"}/>
+                        <div style={{marginLeft: 30}}>
+                            <UploadImg uploadSuccess={(e) => this.state.avatar = e} uploadText={"头像上传"}/>
                         </div>
                     </div>
                 </div>
@@ -230,7 +325,7 @@ class Cadre extends Component {
                                 justifyContent: "center"
                             }}>初任职务
                             </div>
-                            <Posts selectPost={(v)=>this.state.oldpost=v} />
+                            <Posts selectPost={(v) => this.state.oldpost = v}/>
                         </div>
 
                         <div style={{display: 'flex'}}>

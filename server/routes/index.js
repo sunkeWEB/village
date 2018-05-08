@@ -1,6 +1,25 @@
 const router = require('koa-router')()
 const {query} = require('./../asyncdb');
+const multer = require('koa-multer');//加载koa-multer模块
+var storage = multer.diskStorage({
+    //文件保存路径
+    destination: function (req, file, cb) {
+        cb(null, 'public/uploads/')
+    },
+    //修改文件名称
+    filename: function (req, file, cb) {
+        var fileFormat = (file.originalname).split(".");
+        cb(null, Date.now() + "." + fileFormat[fileFormat.length - 1]);
+    }
+})
+//加载配置
+var upload = multer({storage: storage});
 
+router.post('/upload', upload.single('logo'), async (ctx, next) => {
+    ctx.body = {
+        filename: ctx.req.file.filename//返回文件名
+    }
+})
 router.get('/', async (ctx, next) => {
     await ctx.render('index', {
         title: 'Hello Koa 2!'
@@ -80,11 +99,11 @@ router.get('/readposts', async ctx => {
 });
 
 router.post('/addcadrs', async ctx => {
-    let {adders, card, edu, iscity, isxiapai, jointime, mingzu, oldtime, phone, realname, scqk, sex, townid, village,oldpost,beizhu} = {...ctx.request.body};
-    console.log(`insert into cadre(adders,card,edu,iscity,isxiapai,jointime,mingzu,oldtime,phone,realname,scqk,sex,townid,village,oldpost,beizhu)
-    values('${adders}','${card}','${edu}',${iscity},${isxiapai},'${jointime}','${mingzu}','${oldtime}','${phone}','${realname}',${scqk},${sex},${townid},${village},${oldpost},'${beizhu})'`);
-    let stateus = await query(`insert into cadre(adders,card,edu,iscity,isxiapai,jointime,mingzu,oldtime,phone,realname,scqk,sex,townid,village,oldpost,beizhu)
-    values('${adders}','${card}','${edu}','${iscity}',${isxiapai},'${jointime}','${mingzu}','${oldtime}','${phone}','${realname}',${scqk},${sex},${townid},${village},${oldpost},'${beizhu}')`);
+    let {adders, card, edu, iscity, isxiapai, jointime, mingzu, oldtime, phone, realname, scqk, sex, townid, village, oldpost, beizhu, avatar} = {...ctx.request.body};
+    console.log(`insert into cadre(adders,card,edu,iscity,isxiapai,jointime,mingzu,oldtime,phone,realname,scqk,sex,townid,village,oldpost,beizhu,avatar)
+    values('${adders}','${card}','${edu}',${iscity},${isxiapai},'${jointime}','${mingzu}','${oldtime}','${phone}','${realname}',${scqk},${sex},${townid},${village},${oldpost},'${beizhu})','${avatar}')`);
+    let stateus = await query(`insert into cadre(adders,card,edu,iscity,isxiapai,jointime,mingzu,oldtime,phone,realname,scqk,sex,townid,village,oldpost,beizhu,avatar)
+    values('${adders}','${card}','${edu}','${iscity}',${isxiapai},'${jointime}','${mingzu}','${oldtime}','${phone}','${realname}',${scqk},${sex},${townid},${village},${oldpost},'${beizhu}','${avatar}')`);
     if (stateus) {
         ctx.body = {
             code: 0,
@@ -94,21 +113,82 @@ router.post('/addcadrs', async ctx => {
 });
 
 // select a.id,a.realname,a.username,a.townid,a.role,a.roles,a.userpwd,b.townname from admins a  join town b  on a.townid = b.id
-router.get('/readcadre',async ctx=>{
-
-    let {id} = {...ctx.request.body};
-    let sql = `select a.adders,a.card,a.edu,a.iscity,a.isxiapai,a.jointime,a.mingzu,a.oldtime,a.phone,a.realname,a.scqk,a.sex,a.townid,a.village,a.oldpost,a.beizhu,b.id,b.townname from cadre a`;
-    if (id) {
-        sql += ` where a.id=${id}`;
-    }
+router.get('/readcadre', async ctx => {
+    let {id, name, townid, villagesid} = {...ctx.request.query};
+    let sql = `select a.*,b.id as bid,b.townname from cadre a`;
+    // if (id) {
+    //     sql += ` where a.id=${id}`;
+    // }
     sql += ` join town b on a.townid=b.id`;
+
+    let asd = {
+        'name': {
+            data: name ? `"${name}"` : null,
+            sqlKey: "a.realname"
+        },
+        'townid': {
+            data: townid,
+            sqlKey: "b.id"
+        },
+        'villagesid': {
+            data: villagesid,
+            sqlKey: "b.id"
+        }
+    }
+    let w = '';
+    for (let i in asd) {
+        let d = asd[i];
+        if (d.data) {
+            if (w == '') w = " where "
+            w += ` ${d.sqlKey} = ${d.data} and`
+        }
+    }
+    if (w) {
+        let ls = w.lastIndexOf("and") || w.length;
+        w = w.slice(0, ls);
+    }
+    sql += w;
+
+    console.log("---------------------------------");
     console.log(sql);
     let arr = await query(sql);
     if (arr) {
         ctx.body = {
-            code:0,
-            msg:'获取数据成功',
-            data:arr
+            code: 0,
+            msg: '获取数据成功',
+            data: arr
+        };
+    }
+});
+
+router.get('/readsex', async ctx => {
+    let k = await query(`select count(*) as boy from cadre where sex=1 `); // 男
+    let m = await query(`select count(*) as giry from cadre where sex=0 `); // 女
+    ctx.body = {
+        code: 0,
+        msg: '获取数据成功',
+        data: {...k[0], ...m[0]}
+    };
+});
+
+// router.get('/read');
+
+router.post('/delcadre', async ctx => {
+    let {id} = {...ctx.request.body};
+    if (!id) {
+        ctx.body = {
+            code: 10001,
+            msg: '参数错误'
+        };
+        return;
+    }
+    console.log(`delete from cadre where id=${id}`);
+    let status = await query(`delete from cadre where id=${id}`);
+    if (status) {
+        ctx.body = {
+            code: 0,
+            msg: '删除成功',
+            data:status
         };
     }
 });

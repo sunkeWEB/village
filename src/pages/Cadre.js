@@ -1,6 +1,7 @@
 import React,{Component} from 'react';
-import {Button, Input,Table,Select} from 'antd';
-import {readcadre} from './../api/api';
+import {Button, Input,Table,Select,Popconfirm,Icon} from 'antd';
+import {readcadre,delcadre} from './../api/api';
+import MyTownSelect from './../components/MyTownSelect'; // 乡镇选择
 class Cadre extends Component{
     constructor (props) {
         super(props);
@@ -16,6 +17,19 @@ class Cadre extends Component{
        });
     }
 
+   async serch () {
+        let {data, ...b} = {...this.state}; // 过滤data
+        let m = await readcadre({...b});
+       this.setState({
+           data:m.data
+       });
+    }
+
+   async delcadres (id) {
+       let k = await delcadre({id});
+       console.log(k);
+    }
+
     getBirthdayFromIdCard (idCard) {
         var birthday = "";
         if(idCard != null && idCard != ""){
@@ -24,7 +38,6 @@ class Cadre extends Component{
             } else if(idCard.length == 18){
                 birthday = idCard.substr(6,8);
             }
-
             birthday = birthday.replace(/(.{4})(.{2})/,"$1-$2-");
         }
 
@@ -91,7 +104,20 @@ class Cadre extends Component{
         {
             title: '操作',
             render: (value, record) => {
-                return "用户操作";
+                // let {realname, userpwd, username, role, townid, roles, id} = {...value};
+                // let townids = townid;
+                return (<div>
+                    <Popconfirm placement="topLeft" title="你确定删除嘛?"
+                                okText="果断删除"
+                                cancelText="取消"
+                                onConfirm={() => this.delcadres(record.id)}
+                    >
+                        <Icon title={"谨慎删除操作"} type="delete"
+                              style={{marginRight: 15, fontSize: 18, cursor: "pointer"}}/>
+                    </Popconfirm>
+                    <Icon type="edit" title={"编辑信息"}
+                          style={{marginRight: 15, fontSize: 18, cursor: "pointer"}}/>
+                </div>)
             }
         }
     ];
@@ -102,16 +128,13 @@ class Cadre extends Component{
                 <div style={{display: 'flex'}}>
                     <div style={{display: 'flex', marginBottom: 15, flex: 1, justifyContent: 'flex-end'}}>
                         <div>
-                            <Select placeholder="乡(镇 街道)" style={{width: 120}}
-                                    notFoundContent={"没有可选项"}>
-
-                            </Select>
+                            <MyTownSelect isprops={true} selectTown={(e)=>this.state.townid=e} selectVillage={(e)=>this.state.villagesid=e.villagesid} />
                         </div>
                         <div style={{marginLeft: 15}}>
-                            <Input placeholder="姓名"/>
+                            <Input placeholder="姓名" onChange={(e)=>this.state.name=e.target.value}/>
                         </div>
                         <div style={{marginLeft: 15}}>
-                            <Button type="primary">查询</Button>
+                            <Button type="primary" onClick={()=>this.serch()}>查询</Button>
                         </div>
                     </div>
                 </div>

@@ -68,10 +68,27 @@ export function addCadrs(data) {
         data:data
     });
 }
+
 export function readcadre(data) {
+    console.log(data);
     return server({
-        url:'/readcadre',
+        url: '/readcadre',
+        params:data
+    });
+}
+
+// 性别 读取
+export function readsex(data={}) {
+    return server({
+        url:'/readsex',
         method:'get',
+        data:data
+    });
+}
+export function delcadre(data) {
+    return server({
+        url:'/delcadre',
+        method:"post",
         data:data
     });
 }
