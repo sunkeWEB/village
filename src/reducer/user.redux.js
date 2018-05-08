@@ -14,6 +14,7 @@ export function user(state = init, action) {
     switch (action.type) {
         case LOGIN_SUCCESS:
             let x = action.payload;
+            localStorage.setItem('token', x.token);
             return {...state, isAuth: true, errMsg: '', redicertTo: '/', token: x.token, name: x.data.realname};
         case ERR_MSG:
             return {...state, errMsg: action.msg}

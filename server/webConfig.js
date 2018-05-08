@@ -7,5 +7,15 @@ exports.webSetting = {
         password: 'root',
         port: '3306',
         host: 'localhost'
+    },
+    tables:{
+        user:{
+           pwd:''
+        }
+    },
+    autharr:{
+        readusers:{
+            name:'yhlr'
+        }
     }
 };

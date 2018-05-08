@@ -15,14 +15,14 @@ const secret = webSetting.secret;
 onerror(app)
 
 // 使用token验证
-// app.use(tokenError());
+app.use(tokenError());
 app.use(jwtKoa({secret}).unless({
-    path: [/\/users\/login/,/\/users\/info/] //数组中的路径不需要通过jwt验证
+    path: [/\/users\/login/, /\/users\/info/] //数组中的路径不需要通过jwt验证
 }))
 
 // middlewares
 app.use(bodyparser({
-  enableTypes:['json', 'form', 'text']
+    enableTypes: ['json', 'form', 'text']
 }))
 
 app.use(json())
@@ -30,15 +30,15 @@ app.use(logger())
 app.use(require('koa-static')(__dirname + '/public'))
 
 app.use(views(__dirname + '/views', {
-  extension: 'pug'
+    extension: 'pug'
 }))
 
 // logger
 app.use(async (ctx, next) => {
-  const start = new Date()
-  await next()
-  const ms = new Date() - start
-  console.log(`${ctx.method} ${ctx.url} - ${ms}ms`)
+    const start = new Date()
+    await next()
+    const ms = new Date() - start
+    console.log(`${ctx.method} ${ctx.url} - ${ms}ms`)
 })
 
 // routes
@@ -47,7 +47,7 @@ app.use(users.routes(), users.allowedMethods())
 
 // error-handling
 app.on('error', (err, ctx) => {
-  console.error('server error', err, ctx)
+    console.error('server error', err, ctx)
 });
 
 module.exports = app

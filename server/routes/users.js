@@ -8,6 +8,7 @@ const {webSetting} = require('./../webConfig');
 const secret = webSetting.secret;
 const utility = require('utility');
 const {query} = require('./../asyncdb');
+let auth = require('./../middlreware/auth');
 router.prefix('/users')
 
 router.get('/', async (ctx, next) => {
@@ -33,7 +34,7 @@ router.post('/login', async (ctx) => {
         };
         return false;
     }
-    let k = await query(`SELECT * FROM users WHERE username='${name}' and userpwd='${pwd}'`);
+    let k = await query(`SELECT * FROM admins WHERE username='${name}' and userpwd='${pwd}'`);
     if (k.length === 0) {
         ctx.body = {
             msg: '密码或者账号错误',
@@ -41,14 +42,18 @@ router.post('/login', async (ctx) => {
         };
         return;
     }
-
     let userToken = {
-        name: `${k[0].id},${k[0].username}`
+        name: `${k[0].id},${k[0].username}`,
+        roles: `${k[0].roles}`,
+        id:`${k[0].id}`
     }
     let ips = ctx.request.ip.slice(7);
     let time = new Date().getTime();
     const token = jwt.sign(userToken, secret, {expiresIn: '12h'});
     ctx.cookies.set('userid', k[0].id, {
+        maxAge: 800 * 60 * 60 * 1000,   // cookie有效时长 加密用户的id
+    });
+    ctx.cookies.set('token', token, {
         maxAge: 800 * 60 * 60 * 1000,   // cookie有效时长 加密用户的id
     });
     ctx.body = {
@@ -64,7 +69,6 @@ router.post('/updateinfo', async (ctx) => {
     // let {pwd} = {...ctx.request.body};
     let pwd = "sunke";
     let payload;
-    console.log(pwd, token);
     if (!(pwd || token)) {
         ctx.body = {
             msg: '参数错误',
@@ -83,14 +87,19 @@ router.post('/updateinfo', async (ctx) => {
 
 router.get('/info', async ctx => {
     const userid = ctx.cookies.get('userid');
-    let k = await query(`SELECT * FROM users WHERE id='${userid}'`);
+    let k = await query(`SELECT * FROM admins WHERE id='${userid}'`);
     if (k.length > 0) {
         let userToken = {
-            name: `${k[0].id},${k[0].username}`
+            name: `${k[0].id},${k[0].username}`,
+            roles: `${k[0].roles}`,
+            id:`${k[0].id}`
         }
         let ips = ctx.request.ip.slice(7);
         let time = new Date().getTime();
         const token = jwt.sign(userToken, secret, {expiresIn: '12h'});
+        ctx.cookies.set('token', token, {
+            maxAge: 800 * 60 * 60 * 1000,   // cookie有效时长 加密用户的id
+        });
         ctx.body = {
             msg: '登录信息存在',
             code: 0,
@@ -105,10 +114,121 @@ router.get('/info', async ctx => {
     }
 });
 
+// 添加用户
+router.post('/addusers', async ctx => {
+    let {realname, townid, username, userpwd, role, roles} = {...ctx.request.body};
+    if (!(realname || townid || username || userpwd || role)) {
+        ctx.body = {
+            code: 10001,
+            msg: '参数错误'
+        };
+        return;
+    }
+    let sql = `insert into admins(realname, townid, username, userpwd, role, roles) values('${realname}', '${townid}', '${username}', '${userpwd}', '${role}', '${roles}')`;
+    let status = await query(sql);
+    ctx.body = {
+        code: 0,
+        msg: '添加用户成功',
+        data: status
+    };
+});
+
+// 读取用户
+
+router.get('/readusers', async ctx => {
+    let {pagesize, current, townid, villageid, name} = {...ctx.request.query};
+    let num = parseInt(pagesize) * parseInt(current - 1);
+    let sql = `select a.id,a.realname,a.username,a.townid,a.role,a.roles,a.userpwd,b.townname from admins a  join town b  on a.townid = b.id`;
+    let asd = {
+        'name': {
+            data: name ? `"${name}"` : null,
+            sqlKey: "a.realname"
+        },
+        'townid': {
+            data: townid,
+            sqlKey: "b.id"
+        }
+    }
+    let w = '';
+    for (let i in asd) {
+        let d = asd[i];
+        if (d.data) {
+            if (w == '') w = " where "
+            w += ` ${d.sqlKey} = ${d.data} and`
+        }
+    }
+    if (w) {
+        let ls = w.lastIndexOf("and") || w.length;
+        w = w.slice(0, ls);
+    }
+    sql += w;
+    sql += ` LIMIT ${num},${pagesize}`;
+    let status = await query(sql);
+    let sqls = `select a.*,b.*  from admins a  join town b  on a.townid = b.id`;
+    let count = await query(sqls += w);
+    ctx.body = {
+        code: 0,
+        msg: '获取用户数据成功',
+        data: status,
+        count: count.length === 0 ? 0 : count.length
+    };
+});
+
+// 删除用户
+
+router.post('/delusers', async ctx => {
+    let {id} = {...ctx.request.body};
+    if (!id) {
+        ctx.body = {
+            code: 10001,
+            msg: '参数错误'
+        };
+        return;
+    }
+    let status = await query(`delete from admins where id=${parseInt(id)}`);
+    if (status) {
+        ctx.body = {
+            code: 0,
+            msg: '删除数据成功'
+        };
+    }
+});
+
+// 编辑用户信息
+router.post('/updateusers', async ctx => {
+    let {id, username, realname, roles, role, userpwd, townid} = {...ctx.request.body};
+    if (!(id || username || userpwd || townid || realname || roles || role)) {
+        ctx.body = {
+            code: 10001,
+            msg: '参数错误'
+        };
+        return;
+    }
+    let status = await query(`update admins set username='${username}',userpwd='${userpwd}',realname='${realname}',roles='${roles}',role='${role}',townid='${townid}' where id='${id}'`);
+    if (status) {
+        ctx.body = {
+            code: 0,
+            msg: '用户信息修改'
+        };
+    }
+
+});
+
 // function md5(value) {
 //     const k = webSetting.idsecrect;
 //     value = value + k;
 //     return utility.md5(utility.md5(value));
 // }
+
+async function checkauth(url, token, biao) {
+    let x = webSetting.autharr, k = false;
+    url.indexOf(biao) > -1 ? k = x.readusers.name : null; // 判断权限取得路由的 权限名字
+    payload = await verify(token.split(' ')[1], secret);  // // 解密，获取payload payload  {name:'1,root'} 1是用户的id root是他的登录名
+    let userautharr = payload.roles;
+    return new Promise((s1, s2) => {
+        s1(JSON.parse(userautharr)[k] || false);
+    })
+}
+
 
 module.exports = router;

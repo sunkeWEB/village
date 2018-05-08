@@ -29,3 +29,21 @@
 .avatar{
   border-radius: 50%;
 }
+.ant-checkbox-wrapper{
+  margin-left: 0 !important;
+}
+.bars{
+    position: relative;
+}
+.bars:after{
+    position: absolute;
+    left: 0;
+    top: 0;
+    content: ' ';
+    height: 100%;
+    width: 5px;
+    background-color: rgb(74,164,198);
+}
+.ant-layout-content{
+    min-height: auto !important;
+}
