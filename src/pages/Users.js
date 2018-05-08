@@ -270,7 +270,6 @@ class Users extends Component {
         };
         let state = this.state;
         let page = this.state.page;
-        console.log("edit", state.editid);
         return (
             <div>
                 <Modal
