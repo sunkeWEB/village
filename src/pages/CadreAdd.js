@@ -6,7 +6,7 @@ import {readposts, addCadrs} from './../api/api';
 import UploadImg from './../components/UploadImg';
 import {withRouter} from 'react-router-dom';
 import {connect} from 'react-redux';
-
+import {befoderDay} from './../utils';
 const {TextArea} = Input;
 const Option = Select.Option;
 
@@ -39,9 +39,9 @@ class Cadre extends Component {
         let k = this.getarr('jcqks');  // 奖惩情况
         let s = this.getarr('pxqk');  // 培训情况
         let c = this.getarr('lvqk');  // 履历情况
-        console.log(c);
+
         let ss = []; // 存放培训情况的信息
-        for (let b=0;b<s.length;b++) {
+        for (let b = 0; b < s.length; b++) {
             if ((s[b].time === '' || s[b].value === '') && b !== 0) { // 判断除了第一项的 其他值
                 alert(`培训情况栏目第 ${b + 1} 栏中信息不能为空`);
                 return;
@@ -50,65 +50,83 @@ class Cadre extends Component {
                     if (s[b].time !== '' || s[b].value !== '') {  // 判断第一项里面其中一项是不是有值
                         if (s[b].time !== '' && s[b].value !== '') {
                             ss.push(s[b]);
-                        }else{
+                        } else {
                             alert(`培训情况栏目第 1 栏中信息不准确,请检查`);
                             return;
                         }
                     }
-                }else{
+                } else {
                     ss.push(s[b]);
                 }
             }
         }
 
+
         let kk = []; //  存放奖惩情况
-        for (let b=0;b<k.length;b++) {
+        for (let b = 0; b < k.length; b++) {
             if ((k[b].time === '' || k[b].jcvalue === '') && b !== 0) { // 判断除了第一项的 其他值
                 alert(`奖惩情况栏目第 ${b + 1} 栏中信息不能为空`);
-                return ;
+                return;
             } else {
                 if (b === 0) {
-                    console.log(s[b]);
-                    if (k[b]['jcvalue'] !== '' ||k[b].time !== '') {  // 判断第一项里面其中一项是不是有值
+                    // console.log(s[b]);
+                    if (k[b]['jcvalue'] !== '' || k[b].time !== '') {  // 判断第一项里面其中一项是不是有值
                         if (k[b].time !== '' && k[b]['jcvalue'] !== '') {
                             kk.push(k[b]);
-                        }else{
+                        } else {
                             alert(`奖惩情况栏目第 1 栏中信息不准确,请检查`);
                             return;
                         }
                     }
-                }else{
+                } else {
                     kk.push(k[b]);
                 }
             }
         }
 
         let cc = []; // 存放履历情况
-        // for (let b=0;b<c.length;b++) {
-        //     if ((k[b].time === '' || k[b].jcvalue === '') && b !== 0) { // 判断除了第一项的 其他值
-        //         alert(`奖惩情况栏目第 ${b + 1} 栏中信息不能为空`);
-        //         return ;
-        //     } else {
-        //         if (b === 0) {
-        //             console.log(s[b]);
-        //             if (k[b]['jcvalue'] !== '' ||k[b].time !== '') {  // 判断第一项里面其中一项是不是有值
-        //                 if (k[b].time !== '' && k[b]['jcvalue'] !== '') {
-        //                     kk.push(k[b]);
-        //                 }else{
-        //                     alert(`奖惩情况栏目第 1 栏中信息不准确,请检查`);
-        //                     return;
-        //                 }
-        //             }
-        //         }else{
-        //             kk.push(k[b]);
-        //         }
-        //     }
-        // }
+        for (let b = 0; b < c.length; b++) {
+            if ((c[b].time === '' || c[b].lzyy === '' || c[b].rztime === '' || c[b].zclz === '' || c[b].zw === '') && b !== 0) { // 判断除了第一项的 其他值
+                alert(`履历情况栏目第 ${b + 1} 栏中信息不能为空`);
+                return;
+            } else {
+                if (b === 0) {
+                    // console.log(c[b].time !== '' || c[b].lzyy !== '' || c[b].rztime !== '');
+                    if (c[b].time !== '' || c[b].lzyy !== '' || c[b].rztime !== '') {  // 判断第一项里面其中一项是不是有值
+                        if (c[b].time !== '' && c[b].lzyy !== '' && c[b].rztime !== '' && c[b].zclz !== '' && c[b].zw !== '') {
+                            // console.log(befoderDay(c[b].rztime,c[b].time));
+                            cc.push(c[b]);
+                        } else {
+                            alert(`履历情况栏目第 1 栏中信息不准确,请检查`);
+                            return;
+                        }
+                    } else if (c[b].zw) {
+                        if (c[b].time === '' && c[b].lzyy === '' && c[b].rztime === '') {
+                            alert(`履历情况栏目第 1 栏中信息不准确,请检查`);
+                            return;
+                        }
+                    }
+                } else {
+                    cc.push(c[b]);
+                }
+            }
+        }
+
+        console.log("-------------通过--------------");
+        // console.log(ss,kk,cc);
+
+
+        let y = 0; // 间隔年限
+        for (let x = 0; x < cc.length; x++) {
+            if (cc.length === 1) {  // 就证明只有一个履历情况
+            } else {
+
+            }
+        }
 
         return;
         let m = await addCadrs({...this.state});
     }
-
 
 
     getarr(dom) {
@@ -209,7 +227,11 @@ class Cadre extends Component {
                                         <Select style={{width: 120}} placeholder={"学历状况"}
                                                 onChange={(v) => this.handleInput('edu', v)}>
                                             <Option value={"本科"}>本科</Option>
+                                            <Option value={"大专"}>大专</Option>
                                             <Option value={"博士"}>博士</Option>
+                                            <Option value={"研究生"}>研究生</Option>
+                                            <Option value={"高中"}>高中</Option>
+                                            <Option value={"初中及以下"}>初中及以下</Option>
                                         </Select>
                                     </div>
                                 </div>
@@ -369,7 +391,7 @@ class Cadre extends Component {
                               }}/>
                     </div>
                     {
-                        new Array(this.state.pxnum).fill(7).map(() => <Cells/>)
+                        new Array(this.state.pxnum).fill(7).map((item, index) => <Cells index={index}/>)
                     }
                 </div>
 
@@ -432,8 +454,8 @@ class Cadre extends Component {
 }
 
 // 履历情况
-let Cell = () => (
-    <div style={{display: 'flex', padding: 10}} className="lvqk">
+let Cell = (props) => (
+    <div data-index={props.index} style={{display: 'flex', padding: 10}} className="lvqk">
         <div style={{display: 'flex'}}>
             <div
                 style={{
@@ -443,7 +465,17 @@ let Cell = () => (
                     justifyContent: "center"
                 }}>离职职务
             </div>
-            <Posts/>
+            <Posts selectPost={() => console.log()}/>
+        </div>
+        <div style={{display: 'flex'}}>
+            <div style={{
+                width: 100,
+                display: 'flex',
+                alignItems: "center",
+                justifyContent: "center"
+            }}>任职时间
+            </div>
+            <DatePicker className={"rztime"} placeholder={"职务任职时间"}/>
         </div>
         <div style={{display: 'flex'}}>
             <div style={{

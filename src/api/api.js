@@ -92,3 +92,17 @@ export function delcadre(data) {
         data:data
     });
 }
+
+export function readwen(data) {
+    return server({
+        url:'/readwen',
+        data
+    });
+}
+
+export function readxia(data) {
+    return server({
+        url:'/readxia',
+        data
+    });
+}

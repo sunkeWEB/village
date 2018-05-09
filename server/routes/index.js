@@ -161,15 +161,50 @@ router.get('/readcadre', async ctx => {
     }
 });
 
+// 性别 比例查询
 router.get('/readsex', async ctx => {
-    let k = await query(`select count(*) as boy from cadre where sex=1 `); // 男
-    let m = await query(`select count(*) as giry from cadre where sex=0 `); // 女
+    let m = await query(`select sum(case when sex=1 then 1 else 0 end) as boy,sum(case when sex=0 then 1 else 0 end) as giry ,count(*) as total  from cadre`); // 女
     ctx.body = {
         code: 0,
         msg: '获取数据成功',
-        data: {...k[0], ...m[0]}
+        data: m[0]
     };
 });
+// 文化 比例查询
+router.get('/readwen', async ctx => {
+    let m = await query(`select sum(case when edu='大专' then 1 else 0 end) as daz,
+      sum(case when edu='高中' then 1 else 0 end) as gaoz,
+      sum(case when edu='研究生' then 1 else 0 end) as yanjiu,
+      sum(case when edu='初中' then 1 else 0 end) as chuz,
+      sum(case when edu='博士' then 1 else 0 end) as boshi,
+      sum(case when edu='本科' then 1 else 0 end) as benke ,count(*) as total  from cadre`); //
+
+    let {daz,gaoz,yanjiu,chuz,boshi,benke,total} = {...m[0]};
+
+    let dzys = yanjiu + boshi + benke; // 本科及以上的总人数
+
+    ctx.body = {
+        code: 0,
+        msg: '获取数据成功',
+        data: {daz,dzys,gaoz,chuz,total}
+    };
+});
+
+// 下派 比例查询
+router.get('/readxia', async ctx => {
+    let m = await query(`select sum(case when isxiapai=1 then 1 else 0 end) as isxia,sum(case when isxiapai=0 then 1 else 0 end) as noxia ,count(*) as total  from cadre`); //
+    ctx.body = {
+        code: 0,
+        msg: '获取数据成功',
+        data: m[0]
+    };
+});
+
+// 年龄占比
+router.get('/readage',async ctx=>{
+
+});
+
 
 // router.get('/read');
 
@@ -188,10 +223,16 @@ router.post('/delcadre', async ctx => {
         ctx.body = {
             code: 0,
             msg: '删除成功',
-            data:status
+            data: status
         };
     }
 });
+
+// 机构管理中的职务查询
+router.get('/readzw', async ctx=>{
+
+});
+
 
 
 module.exports = router

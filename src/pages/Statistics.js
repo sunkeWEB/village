@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import test from './../test.css';
 import { VictoryChart,VictoryBar,VictoryLabel,VictoryPie} from 'victory';
 import {Select,Input,Button,Table,DatePicker, Radio} from 'antd';
-import {readsex} from './../api/api';
+import {readsex,readwen,readxia} from './../api/api';
 const { MonthPicker, RangePicker, WeekPicker } = DatePicker;
 
 export default class Statistics extends Component{
@@ -155,7 +155,7 @@ export default class Statistics extends Component{
   }
 
   async componentDidMount () {
-      let k = await readsex(); // 性别
+      let k = await readxia(); // 性别
       console.log(k);
   }
 
